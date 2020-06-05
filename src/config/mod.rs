@@ -15,6 +15,7 @@ pub use self::int::{FixintEncoding, VarintEncoding};
 pub use self::legacy::*;
 pub use self::limit::{Bounded, Infinite};
 pub use self::trailing::{AllowTrailing, RejectTrailing};
+use config::int::FixintU8DiscriminantsEncoding;
 
 mod endian;
 mod int;
@@ -116,6 +117,11 @@ pub trait Options: InternalOptions + Sized {
 
     /// Sets the length encoding to be fixed
     fn with_fixint_encoding(self) -> WithOtherIntEncoding<Self, FixintEncoding> {
+        WithOtherIntEncoding::new(self)
+    }
+
+    /// Sets the length encoding to be fixed
+    fn with_fixint_u8_discriminants_encoding(self) -> WithOtherIntEncoding<Self, FixintU8DiscriminantsEncoding> {
         WithOtherIntEncoding::new(self)
     }
 
