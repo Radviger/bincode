@@ -171,7 +171,7 @@ impl<'a, W: Write, O: Options> serde::Serializer for &'a mut Serializer<W, O> {
         _variant: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeTupleVariant> {
-        O::IntEncoding::serialize_u32(self, variant_index)?;
+        O::IntEncoding::serialize_variant(self, variant_index)?;
         Ok(Compound { ser: self })
     }
 
@@ -192,7 +192,7 @@ impl<'a, W: Write, O: Options> serde::Serializer for &'a mut Serializer<W, O> {
         _variant: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeStructVariant> {
-        O::IntEncoding::serialize_u32(self, variant_index)?;
+        O::IntEncoding::serialize_variant(self, variant_index)?;
         Ok(Compound { ser: self })
     }
 
@@ -223,7 +223,7 @@ impl<'a, W: Write, O: Options> serde::Serializer for &'a mut Serializer<W, O> {
         variant_index: u32,
         _variant: &'static str,
     ) -> Result<()> {
-        O::IntEncoding::serialize_u32(self, variant_index)
+        O::IntEncoding::serialize_variant(self, variant_index)
     }
 
     fn is_human_readable(&self) -> bool {
@@ -245,7 +245,7 @@ impl<O: Options> SizeChecker<O> {
     }
 
     fn add_discriminant(&mut self, idx: u32) -> Result<()> {
-        let bytes = O::IntEncoding::u32_size(idx);
+        let bytes = O::IntEncoding::variant_size(idx);
         self.add_raw(bytes)
     }
 
@@ -365,7 +365,8 @@ impl<'a, O: Options> serde::Serializer for &'a mut SizeChecker<O> {
         _variant: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeTupleVariant> {
-        self.add_raw(O::IntEncoding::u32_size(variant_index))?;
+        //self.add_raw(O::IntEncoding::u32_size(variant_index))?;
+        self.add_raw(1)?;
         Ok(SizeCompound { ser: self })
     }
 
