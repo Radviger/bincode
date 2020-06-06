@@ -4,7 +4,7 @@ use std::mem::size_of;
 use super::Options;
 use de::read::BincodeRead;
 use error::{ErrorKind, Result};
-use Serializer;
+use ::{Serializer, Deserializer};
 
 pub trait IntEncoding {
     /// Gets the size (in bytes) that a value would be serialized to.
@@ -85,6 +85,10 @@ pub trait IntEncoding {
     ) -> Result<u16>;
 
     fn deserialize_u32<'de, R: BincodeRead<'de>, O: Options>(
+        de: &mut ::de::Deserializer<R, O>,
+    ) -> Result<u32>;
+
+    fn deserialize_variant<'de, R: BincodeRead<'de>, O: Options>(
         de: &mut ::de::Deserializer<R, O>,
     ) -> Result<u32>;
 
@@ -420,6 +424,13 @@ impl IntEncoding for FixintEncoding {
         de.deserialize_literal_u32()
     }
     #[inline(always)]
+    fn deserialize_variant<'de, R: BincodeRead<'de>, O: Options>(
+        de: &mut Deserializer<R, O>
+    ) -> Result<u32> {
+        de.deserialize_literal_u32()
+    }
+
+    #[inline(always)]
     fn deserialize_u64<'de, R: BincodeRead<'de>, O: Options>(
         de: &mut ::Deserializer<R, O>,
     ) -> Result<u64> {
@@ -561,6 +572,12 @@ impl IntEncoding for FixintU8DiscriminantsEncoding {
         de.deserialize_literal_u32()
     }
     #[inline(always)]
+    fn deserialize_variant<'de, R: BincodeRead<'de>, O: Options>(
+        de: &mut ::Deserializer<R, O>,
+    ) -> Result<u32> {
+        de.deserialize_byte().map(|b| b as u32)
+    }
+    #[inline(always)]
     fn deserialize_u64<'de, R: BincodeRead<'de>, O: Options>(
         de: &mut ::Deserializer<R, O>,
     ) -> Result<u64> {
@@ -700,6 +717,12 @@ impl IntEncoding for VarintEncoding {
         de: &mut ::Deserializer<R, O>,
     ) -> Result<u32> {
         Self::deserialize_varint(de).and_then(cast_u64_to_u32)
+    }
+    #[inline(always)]
+    fn deserialize_variant<'de, R: BincodeRead<'de>, O: Options>(
+        de: &mut Deserializer<R, O>
+    ) -> Result<u32> {
+        de.deserialize_literal_u32()
     }
     #[inline(always)]
     fn deserialize_u64<'de, R: BincodeRead<'de>, O: Options>(
