@@ -546,6 +546,15 @@ impl IntEncoding for FixintU8DiscriminantsEncoding {
         ser.serialize_literal_u64(val)
     }
 
+    /// Serializes a sequence length.
+    #[inline(always)]
+    fn serialize_len<W: Write, O: Options>(
+        ser: &mut ::ser::Serializer<W, O>,
+        len: usize,
+    ) -> Result<()> {
+        Self::serialize_variant(ser, len as u32)
+    }
+
     #[inline(always)]
     fn serialize_i16<W: Write, O: Options>(ser: &mut ::Serializer<W, O>, val: i16) -> Result<()> {
         ser.serialize_literal_u16(val as u16)
@@ -582,6 +591,13 @@ impl IntEncoding for FixintU8DiscriminantsEncoding {
         de: &mut ::Deserializer<R, O>,
     ) -> Result<u64> {
         de.deserialize_literal_u64()
+    }
+    /// Deserializes a sequence length.
+    #[inline(always)]
+    fn deserialize_len<'de, R: BincodeRead<'de>, O: Options>(
+        de: &mut ::de::Deserializer<R, O>,
+    ) -> Result<usize> {
+        Self::deserialize_variant(de).map(|v| v as usize)
     }
 
     #[inline(always)]
